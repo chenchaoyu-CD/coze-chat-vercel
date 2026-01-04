@@ -1,0 +1,16 @@
+{
+  "name": "coze-chat-vercel",
+  "version": "1.0.0",
+  "description": "Coze智能体API对接Vercel代理项目",
+  "main": "index.js",
+  "scripts": {
+    "start": "node api/coze-chat.js",
+    "dev": "node api/coze-chat.js"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": "18.x"  // 适配Vercel默认Node版本，避免兼容性问题
+  }
+}

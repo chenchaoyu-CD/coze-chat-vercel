@@ -1,9 +1,9 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" } // 识别api文件夹下所有js文件为Node.js函数
+    { "src": "coze-chat.js", "use": "@vercel/node" }  // 告知Vercel使用Node.js构建
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1.js" } // 路由映射：/api/coze-chat → /api/coze-chat.js
+    { "src": "/api/(.*)", "dest": "coze-chat.js" }  // API路由映射
   ]
 }

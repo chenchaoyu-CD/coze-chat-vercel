@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coze智能体（GitHub+Vercel免费版）</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .chat-container {
+      max-width: 800px;
+      margin: 20px auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      height: 70vh;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+    }
+    .msg-item {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 6px;
+      max-width: 70%;
+    }
+    .user-msg {
+      background-color: #2196F3;
+      color: white;
+      margin-left: auto;
+    }
+    .ai-msg {
+      background-color: #e0e0e0;
+      color: #333;
+      margin-right: auto;
+    }
+    .input-area {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+    }
+    #user-input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      outline: none;
+      font-size: 16px;
+    }
+    #send-btn {
+      padding: 12px 24px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    #send-btn:hover {
+      background-color: #1976D2;
+    }
+    .error-msg {
+      color: red;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container" id="chat-container"></div>
+  <div class="input-area">
+    <input type="text" id="user-input" placeholder="请输入问题，和Coze智能体对话...">
+    <button id="send-btn" onclick="sendMessage()">发送</button>
+  </div>
+  <div class="error-msg" id="error-tip"></div>
+
+  <script>
+    // 替换为你的Vercel项目API地址（格式：https://你的项目名.vercel.app/api/coze-chat）
+    const VERCEL_API_URL = "https://your-coze-project.vercel.app/api/coze-chat";
+    let conversation_id; // 保存会话ID，维持上下文对话
+
+    async function sendMessage() {
+      const inputDom = document.getElementById('user-input');
+      const query = inputDom.value.trim();
+      const chatContainer = document.getElementById('chat-container');
+      const errorTipDom = document.getElementById('error-tip');
+
+      // 清空错误提示
+      errorTipDom.innerText = "";
+      // 校验输入是否为空
+      if (!query) {
+        errorTipDom.innerText = "提示：请输入对话内容后再发送！";
+        return;
+      }
+
+      // 显示用户消息
+      const userMsg = document.createElement('div');
+      userMsg.className = "msg-item user-msg";
+      userMsg.innerText = query;
+      chatContainer.appendChild(userMsg);
+      // 清空输入框并滚动到最底部
+      inputDom.value = "";
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        // 调用Vercel代理API（间接访问Coze API）
+        const response = await fetch(VERCEL_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: query,
+            conversation_id: conversation_id
+          })
+        });
+
+        const data = await response.json();
+
+        // 更新会话ID，维持上下文
+        if (data.conversation_id) {
+          conversation_id = data.conversation_id;
+        }
+
+        // 显示AI响应
+        const aiMsg = document.createElement('div');
+        aiMsg.className = "msg-item ai-msg";
+        aiMsg.innerText = data.answer || "智能体响应失败，请稍后再试";
+        chatContainer.appendChild(aiMsg);
+        // 滚动到最底部
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      } catch (error) {
+        // 显示错误信息
+        const errorMsg = document.createElement('div');
+        errorMsg.className = "msg-item ai-msg";
+        errorMsg.style.color = "red";
+        errorMsg.innerText = `请求失败：${error.message}`;
+        chatContainer.appendChild(errorMsg);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }
+
+    // 支持回车键发送消息
+    document.getElementById('user-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
